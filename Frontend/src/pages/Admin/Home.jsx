@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopleFill } from 'react-icons/bs';
 import { 
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
-import { motion } from 'framer-motion';
-
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import dataJson from '../../data.json';
@@ -17,19 +15,18 @@ function Home() {
 
     useEffect(() => {
         const categories = Object.keys(dataJson);
-        const bookCount = categories.reduce((acc, category) => acc + dataJson[category].length, 0);
-        
+        const allBooks = categories.reduce((acc, cat) => [...acc, ...dataJson[cat]], []);
+        const bookCount = allBooks.length;
+        const issuedCount = allBooks.filter(b => b.issued).length;
+
         setTotalBooks(bookCount);
         setTotalCategories(categories.length);
+        setIssuedPercentage(Math.round((issuedCount / bookCount) * 100));
 
-        // Simulated issued books percentage (adjust as needed)
-        const issuedBooks = Math.floor(bookCount * 0.7); // 70% issued
-        setIssuedPercentage((issuedBooks / bookCount) * 100);
-
-        // Prepare chart data
         const formattedData = categories.map(category => ({
-            name: category,
-            books: dataJson[category].length
+            name: category.replace(/([A-Z])/g, ' $1').trim(),
+            books: dataJson[category].length,
+            issued: dataJson[category].filter(b => b.issued).length
         }));
 
         setChartData(formattedData);
@@ -38,11 +35,10 @@ function Home() {
     return (
         <main className='main-container'>
             <div className='main-title'>
-                <h3>DASHBOARD</h3>
+                <h3>Dashboard</h3>
             </div>
 
             <div className='main-cards'>
-                {/* Books Card */}
                 <div className='card book-card'>
                     <div className='card-inner'>
                         <h3>BOOKS</h3>
@@ -51,7 +47,6 @@ function Home() {
                     <h1>{totalBooks}</h1>
                 </div>
 
-                {/* Genres Card */}
                 <div className='card genre-card'>
                     <div className='card-inner'>
                         <h3>GENRES</h3>
@@ -60,58 +55,49 @@ function Home() {
                     <h1>{totalCategories}</h1>
                 </div>
 
-                {/* Customers Card */}
                 <div className='card customer-card'>
                     <div className='card-inner'>
-                        <h3>CUSTOMERS</h3>
+                        <h3>MEMBERS</h3>
                         <BsPeopleFill className='card_icon'/>
                     </div>
-                    <h1>33</h1>
+                    <h1>12</h1>
                 </div>
             </div>
 
-            <div className='chart-progress-container' style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div className='charts' style={{ flex: 1 }}>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <LineChart
-                            data={chartData}
-                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                        >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="books" stroke="#8884d8" activeDot={{ r: 8 }} />
-                        </LineChart>
+            <div className='chart-progress-container'>
+                <div className='charts-section'>
+                    <h4>Books by Genre</h4>
+                    <ResponsiveContainer width="100%" height={280}>
+                        <BarChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+                            <XAxis dataKey="name" tick={{ fill: '#8b8fa3', fontSize: 12 }} />
+                            <YAxis tick={{ fill: '#8b8fa3', fontSize: 12 }} />
+                            <Tooltip 
+                                contentStyle={{ backgroundColor: '#1d2634', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }} 
+                            />
+                            <Bar dataKey="books" fill="#6a11cb" radius={[6, 6, 0, 0]} name="Total" />
+                            <Bar dataKey="issued" fill="#2575fc" radius={[6, 6, 0, 0]} name="Issued" />
+                        </BarChart>
                     </ResponsiveContainer>
                 </div>
 
-               {/* Circular Progress Bar (Issued Books) */}
-               <motion.div 
-                    className='circular-progress'
-                    initial={{ x: 50, opacity: 0 }} 
-                    animate={{ x: 0, opacity: 1 }} 
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    style={{
-                        width: 140, height: 140, marginLeft: 40, boxShadow: '0px 4px 10px rgba(0,0,0,0.2)',
-                        padding: 10, borderRadius: '50%', backgroundColor: '#fff', display: 'flex',
-                        flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
-                    }}
-                >
-                    <CircularProgressbar
-                        value={issuedPercentage}
-                        text={`${Math.round(issuedPercentage)}%`}
-                        styles={buildStyles({
-                            textSize: '16px',
-                            pathColor: `#3e98c7`,
-                            textColor: '#3e98c7',
-                            trailColor: '#eee',
-                            strokeLinecap: "round"
-                        })}
-                    />
-                    <p style={{ textAlign: 'center', marginTop: 10, fontWeight: 'bold', color: '#555' }}>Issued Books</p>
-                </motion.div>
+                <div className='circular-progress-wrap'>
+                    <h4>Issued</h4>
+                    <div style={{ width: 120, height: 120 }}>
+                        <CircularProgressbar
+                            value={issuedPercentage}
+                            text={`${issuedPercentage}%`}
+                            styles={buildStyles({
+                                textSize: '18px',
+                                pathColor: '#2575fc',
+                                textColor: '#fff',
+                                trailColor: 'rgba(255,255,255,0.08)',
+                                strokeLinecap: 'round'
+                            })}
+                        />
+                    </div>
+                    <p>Books Currently Issued</p>
+                </div>
             </div>
         </main>
     );

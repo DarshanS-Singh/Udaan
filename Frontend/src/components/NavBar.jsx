@@ -1,121 +1,72 @@
 import React, { useState } from "react";
-import { SearchIcon, ChartPieIcon, DocumentAddIcon, HandIcon, MenuIcon, XIcon } from "@heroicons/react/solid";
-import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion"; // For smooth animations
+import { useNavigate, Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isSearchActive, setIsSearchActive] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   return (
-    <nav className="bg-gray-900 text-gray-300 p-4">
-      <div className="container mx-auto flex items-center justify-center h-16 relative">
+    <nav className="bg-gray-900 text-gray-300 border-b border-gray-800">
+      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
         
-        {/* Left Section (Hamburger + Icons) */}
-        <div className="absolute left-4 flex items-center space-x-3">
-          {/* Hamburger Menu (Mobile) */}
-          <button
-            className="md:hidden p-2 rounded-md bg-gray-800 hover:bg-gray-700 transition duration-300"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <XIcon className="h-6 w-6 text-gray-300" /> : <MenuIcon className="h-6 w-6 text-gray-300" />}
-          </button>
-
-          {/* Icons (Hidden when screen is small) */}
-          <div className={`md:flex space-x-3 ${isMenuOpen ? "hidden" : "flex"}`}>
-            <button
-              onClick={() => navigate("/analysis")}
-              className="p-2 rounded-md bg-gray-800 hover:bg-gray-700 transition duration-300"
-              title="View Analysis"
-            >
-              <ChartPieIcon className="h-6 w-6 text-gray-300" />
-            </button>
-            <button
-              onClick={() => navigate("/add-book")}
-              className="p-2 rounded-md bg-gray-800 hover:bg-gray-700 transition duration-300"
-              title="Add a Book"
-            >
-              <DocumentAddIcon className="h-6 w-6 text-gray-300" />
-            </button>
-            <button
-              onClick={() => navigate("/issue-book")}
-              className="p-2 rounded-md bg-gray-800 hover:bg-gray-700 transition duration-300"
-              title="Issue a Book"
-            >
-              <img src = "./test2.png" alt = "Book Issuer Icon" className="h-6 w-6 text-gray-300" />
-            </button>
-          </div>
+        {/* Left: Nav Links */}
+        <div className="flex items-center space-x-1">
+          <Link to="/" className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition">
+            Home
+          </Link>
+          <Link to="/add-book" className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition">
+            Add Book
+          </Link>
+          <Link to="/issue-book" className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition">
+            Issue Book
+          </Link>
+          <Link to="/members" className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition">
+            Members
+          </Link>
+          <Link to="/analysis" className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition">
+            Dashboard
+          </Link>
         </div>
 
-        {/* Center Title (Always Centered) */}
-        {!isSearchActive ? (
-          <div className="flex-grow flex justify-center">
-            <h1 className="text-3xl md:text-4xl font-serif">Library Collection</h1>
-          </div>
-        ) : (
-          <div className="relative w-full max-w-md">
-            <input
-              type="text"
-              autoFocus
-              onBlur={() => setIsSearchActive(false)}
-              className="w-full p-2 pl-12 bg-gray-800 text-gray-300 placeholder-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-300"
-              placeholder="Search books..."
-            />
-            <SearchIcon className="absolute left-3 top-2.5 h-6 w-6 text-gray-400" />
-          </div>
-        )}
+        {/* Center: Title */}
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          <Link to="/" className="text-2xl font-serif text-white hover:text-gray-200 transition">
+            Udaan Library
+          </Link>
+        </div>
 
-        {/* Right Section (Search) */}
-        <div className="absolute right-4">
-          {!isSearchActive && (
-            <SearchIcon
-              className="h-8 w-8 text-gray-400 cursor-pointer"
+        {/* Right: Search + Login */}
+        <div className="flex items-center space-x-3">
+          {isSearchActive ? (
+            <div className="relative">
+              <input
+                type="text"
+                autoFocus
+                onBlur={() => setIsSearchActive(false)}
+                className="w-56 px-4 py-2 bg-gray-800 text-gray-300 placeholder-gray-500 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-600 transition"
+                placeholder="Search books..."
+              />
+            </div>
+          ) : (
+            <button
               onClick={() => setIsSearchActive(true)}
-            />
+              className="p-2 rounded-lg hover:bg-gray-800 transition"
+              title="Search"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
           )}
+
+          <Link
+            to="/login"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition"
+          >
+            Login
+          </Link>
         </div>
       </div>
-
-      {/* Mobile Menu (Animated Dropdown) */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="md:hidden flex flex-col space-y-2 mt-3 bg-gray-800 p-3 rounded-md"
-          >
-            <button
-              onClick={() => {
-                navigate("/analysis");
-                setIsMenuOpen(false);
-              }}
-              className="p-3 hover:bg-gray-700 rounded-md transition"
-            >
-              View Analysis
-            </button>
-            <button
-              onClick={() => {
-                navigate("/add-book");
-                setIsMenuOpen(false);
-              }}
-              className="p-3 hover:bg-gray-700 rounded-md transition"
-            >
-              Add a Book
-            </button>
-            <button
-              onClick={() => {
-                navigate("/issue-book");
-                setIsMenuOpen(false);
-              }}
-              className="p-3 hover:bg-gray-700 rounded-md transition"
-            >
-              Issue a Book
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </nav>
   );
 };
